@@ -1,0 +1,26 @@
+{
+  "ok": true,
+  "result": {
+    "message_id": 126,
+    "from": {
+      "id": 6731479806,
+      "is_bot": true,
+      "first_name": "evil_bot",
+      "username": "eeevil_bot"
+    },
+    "chat": {
+      "id": -4207795971,
+      "title": "Mr and evil_bot",
+      "type": "group",
+      "all_members_are_administrators": true
+    },
+    "date": 1714809042,
+    "document": {
+      "file_name": "samir.txt",
+      "mime_type": "text/plain",
+      "file_id": "BQACAgUAAxkDAAN-ZjXo0pVZAqebZAeondCf0fDkpjgAAnIPAAJ1iLBV8GZSsfMoH540BA",
+      "file_unique_id": "AgADcg8AAnWIsFU",
+      "file_size": 3308236
+    }
+  }
+}
