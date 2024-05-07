@@ -138,8 +138,8 @@ class FileSystem :
         # with open('st.json','r') as file : 
         #     scraped_data = json.load(file)
 
-        mp4_arr = self.mp4_upload(self.working_dir)
-        scraped_data['mp4_arr'] = mp4_arr
+        # mp4_arr = self.mp4_upload(self.working_dir)
+        # scraped_data['mp4_arr'] = mp4_arr
 
         scraped_data['imdb_id'] = imdb_id
         scraped_data['ss'] = ss

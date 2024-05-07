@@ -50,7 +50,7 @@ class M3u8:
         splited = output_name.split('/')
         splited.insert(-1, self.m3u8_dir)
         output_name = '/'.join(splited)
-        ffmpeg_command = ['ffmpeg', '-y', '-loglevel', 'quiet', '-i', name, '-c:v', 'copy', '-c:a', 'copy', '-hls_time', '5', '-hls_list_size', '0', output_name]
+        ffmpeg_command = ['ffmpeg', '-y', '-loglevel', 'quiet', '-i', name, '-c:v', 'copy', '-c:a', 'copy', '-hls_time', '10', '-hls_list_size', '0', output_name]
         subprocess.run(ffmpeg_command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
     def ts_to_mp4(self, name:str):
