@@ -4,11 +4,13 @@ from modules.download import download_file_link
 from modules.m3u8 import M3u8
 from modules.db import insert_data_into_db,create_table
 from modules.db_insert import main_db
+from threading import Thread
 import subprocess
 import os 
 import requests
 import json
 import m3u8
+
 
 # print(send('ehh.txt','test/x.txt'))
 test_m3u8 = 'https://www119.vipanicdn.net/streamhls/395c00c8e81e269aa76202288b5c4727/ep.1.1709288211.360.m3u8'
@@ -86,27 +88,26 @@ class FileSystem :
         elif ss==None and ep == None : 
             return requests.get(f'{self.vidsrc}/movie/{imdb_id}').json()
         
-    
+    def ts_process(self,file ,folder_path):
+
+        sent = send(file,f'{folder_path}')
+        obj = sent['result']['document']
+        file_id = obj['file_id']
+        download_link = download_file_link(file_id=file_id)
+        obj['link'] = download_link
+        # arr.append(obj)
+        return obj 
+
     def ts_upload(self,list_dir:list , folder_path:str):
         arr = []
         scraped_data = {}
-        exicuted = False
+        threads = []
+        # exicuted = False
         for file in list_dir : 
             if not file.endswith('.m3u8') and file.endswith('.ts') : 
                 print(f'processing:{file}')
-                sent = send(file,f'{folder_path}/{file}')
-                obj = sent['result']['document']
-                file_id = obj['file_id']
-                download_link = download_file_link(file_id=file_id)
-                obj['link'] = download_link
-                arr.append(obj)
-                if exicuted ==False :
-                    for key, value in sent['result'].items():
-                            # Skip the 'document' key
-                        if key != 'document':
-                            # Add the key and value to the scraped_data dictionary
-                            scraped_data[key] = value
-                    exicuted =True
+                path = f'{folder_path}/{file}'
+                self.ts_process(file,path)
         return arr,scraped_data
     def mp4_upload(self,dir:str='hls'): 
         list_dir = os.listdir(self.working_dir)
@@ -130,6 +131,7 @@ class FileSystem :
     def m3u8_files_uploader(self,folder_path:str,imdb_id:str|None=None ,ss:str|None=None,ep:str|None=None):
         list_dir = os.listdir(path=folder_path)
         arr,scraped_data = self.ts_upload(list_dir,folder_path)
+        print(arr)
         # with open('ehh.json','r') as file : 
         #     arr = json.load(file)
 
@@ -196,7 +198,7 @@ class FileSystem :
             
             m3u8 = self.get_m3u8(imdb_id=imdb_id,ss=ss,ep=ep)['m3u8'][0]
             print(m3u8)
-            self.download_video_files(m3u8,imdb_id)
+            self.download_video_files(m3u8,imdb_id+'x')
             self.m3u8_files_uploader(folder_path=f'{self.working_dir}/{self.m3u8_dir}',imdb_id=imdb_id,ss=ss,ep=ep)
             self.remove_directory(self.working_dir)
         except Exception as err : 

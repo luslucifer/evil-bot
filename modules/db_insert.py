@@ -19,7 +19,7 @@ class Message:
 def main_db(obj_j):
     # Establish connection to the PostgreSQL database
     DATABASE_URL = os.getenv('DB_URL')
-    conn = psycopg2.connect(DATABASE_URL)
+    conn = psycopg2.connect('postgresql://movies%20and%20tv%20file%20ids_owner:dA2BlmHuZc0p@ep-polished-waterfall-a55cmupj.us-east-2.aws.neon.tech/movies%20and%20tv%20file%20ids?sslmode=require')
     cursor = conn.cursor()
 
     # Create the Messages table if not exists
