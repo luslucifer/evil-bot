@@ -1,10 +1,10 @@
 import json
-from dotenv import load_dotenv
+# from dotenv import load_dotenv
 import os
 from datetime import datetime
 import psycopg2
 
-load_dotenv()
+# load_dotenv()
 
 # Define your Message class
 class Message:
