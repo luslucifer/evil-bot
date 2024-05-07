@@ -3,6 +3,7 @@ from modules.upload import send
 from modules.download import download_file_link
 from modules.m3u8 import M3u8
 from modules.db import insert_data_into_db,create_table
+from modules.db_insert import main_db
 import subprocess
 import os 
 import requests
@@ -21,6 +22,41 @@ class FileSystem :
          self.create_folder_if_not_exists(f'{working_dir}/{m3u8_dir}')
          self.vidsrc:str = 'https://vidsrc-bc567b0e907e.herokuapp.com'
          create_table()
+
+    def remove_directory(self,directory_path):
+        """
+        Remove a directory and all its contents.
+
+        Args:
+            directory_path (str): The path of the directory to remove.
+
+        Returns:
+            bool: True if the directory is successfully removed, False otherwise.
+        """
+        # Use os.path.exists() to check if the directory exists
+        if os.path.exists(directory_path):
+            try:
+                # Use os.listdir() to get a list of all files and directories in the specified directory
+                for item in os.listdir(directory_path):
+                    # Use os.path.join() to get the full path of each item in the directory
+                    item_path = os.path.join(directory_path, item)
+                    
+                    # Use os.remove() to remove files and os.rmdir() to remove directories
+                    if os.path.isfile(item_path):
+                        os.remove(item_path)  # Remove file
+                    elif os.path.isdir(item_path):
+                        self.remove_directory(item_path)  # Recursively remove subdirectory
+                
+                # Finally, remove the directory itself
+                os.rmdir(directory_path)
+                print(f"Directory '{directory_path}' successfully removed.")
+                return True
+            except Exception as e:
+                print(f"Error occurred while removing directory '{directory_path}': {e}")
+                return False
+        else:
+            print(f"Directory '{directory_path}' does not exist.")
+            return False
 
     def create_folder_if_not_exists(self,folder_path):
         if not os.path.exists(folder_path):
@@ -51,7 +87,7 @@ class FileSystem :
             return requests.get(f'{self.vidsrc}/movie/{imdb_id}').json()
         
     
-    def ts_upload(self,list_dir:str , folder_path:str):
+    def ts_upload(self,list_dir:list , folder_path:str):
         arr = []
         scraped_data = {}
         exicuted = False
@@ -72,7 +108,25 @@ class FileSystem :
                             scraped_data[key] = value
                     exicuted =True
         return arr,scraped_data
-
+    def mp4_upload(self,dir:str='hls'): 
+        list_dir = os.listdir(self.working_dir)
+        arr = []
+        for file in list_dir:
+            try :
+                if not file.endswith('.m3u8') and file.endswith('.mp4') : 
+                        print(f'processing:{file}')
+                        sent = send(file,f'{self.working_dir}/{file}')
+                        obj = sent['result']['video']
+                        print(obj)
+                        file_id = obj['file_id']
+                        download_link = download_file_link(file_id=file_id)
+                        obj['resolution'] = file.split('_')[0] 
+                        obj['link'] = download_link
+                        arr.append(obj)
+            except Exception as err : 
+                print(err)
+        return arr
+    
     def m3u8_files_uploader(self,folder_path:str,imdb_id:str|None=None ,ss:str|None=None,ep:str|None=None):
         list_dir = os.listdir(path=folder_path)
         # arr,scraped_data = self.ts_upload(list_dir,folder_path)
@@ -81,6 +135,9 @@ class FileSystem :
 
         with open('st.json','r') as file : 
             scraped_data = json.load(file)
+
+        mp4_arr = self.mp4_upload(self.working_dir)
+        scraped_data['mp4_arr'] = mp4_arr
 
         scraped_data['imdb_id'] = imdb_id
         scraped_data['ss'] = ss
@@ -129,6 +186,9 @@ class FileSystem :
             json.dump(scraped_data,file,indent=2)           
         with open ('ehh.json','w') as file : 
             json.dump(arr,file,indent=2)
+
+        main_db(scraped_data)
+
         return scraped_data
        
     def main(self, imdb_id:str ,ss:str|int|None = None , ep:str|int|None = None): 
@@ -138,7 +198,7 @@ class FileSystem :
             print(m3u8)
             self.download_video_files(m3u8,'mr_k')
             self.m3u8_files_uploader(folder_path=f'{self.working_dir}/{self.m3u8_dir}',imdb_id=imdb_id,ss=ss,ep=ep)
-            os.rmdir(self.working_dir)
+            self.remove_directory(self.working_dir)
         except Exception as err : 
             print (err)
 
@@ -148,9 +208,10 @@ if __name__ == '__main__':
     # f.main(123)
     with open('Total.txt','r') as file : 
         arr = file.read().splitlines()
+        
     for i in arr:
         f = FileSystem()
-        f.main(imdb_id=i)
+        f.main(imdb_id=arr[0])
 
 
 

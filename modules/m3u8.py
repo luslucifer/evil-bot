@@ -49,7 +49,7 @@ class M3u8:
         link = obj['link_part']
         name = obj['name']
         print(name)
-        command = ['ffmpeg', '-i', link, '-c', 'copy', name]
+        command = ['ffmpeg','-y', '-i', link, '-c', 'copy', name]
         subprocess.run(command) 
         #converting ts to mp4 
         self.ts_to_mp4(name)
