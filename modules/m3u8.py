@@ -14,7 +14,7 @@ class M3u8:
         self.m3u8_dir = m3u8_dir
 
     def download(self, link:str, name:str, path:str=''):
-        host = urlparse(link).netloc
+        # host = urlparse(link).netloc
         try:
             res = requests.get(link)
             master_m3u8_arr = self.master_m3u8_scraper(res.text)
@@ -41,7 +41,7 @@ class M3u8:
         name = obj['name']
         print(name)
         command = ['ffmpeg', '-y', '-loglevel', 'quiet', '-i', link, '-c', 'copy', name]
-        subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.ts_to_mp4(name)
         self.ts_to_m3u8(name)
 

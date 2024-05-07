@@ -4,12 +4,12 @@ from modules.download import download_file_link
 from modules.m3u8 import M3u8
 from modules.db import insert_data_into_db,create_table
 from modules.db_insert import main_db
-from threading import Thread
 import subprocess
 import os 
 import requests
 import json
 import m3u8
+from multiprocessing.pool import ThreadPool
 
 
 # print(send('ehh.txt','test/x.txt'))
@@ -88,27 +88,30 @@ class FileSystem :
         elif ss==None and ep == None : 
             return requests.get(f'{self.vidsrc}/movie/{imdb_id}').json()
         
-    def ts_process(self,file ,folder_path):
-
-        sent = send(file,f'{folder_path}')
-        obj = sent['result']['document']
-        file_id = obj['file_id']
-        download_link = download_file_link(file_id=file_id)
-        obj['link'] = download_link
-        # arr.append(obj)
-        return obj 
-
+    def ts_process(self,file:str ):
+        try:
+            if file.endswith('.ts'):
+                folder_path = f'{self.working_dir}/{self.m3u8_dir}/{file}'
+                sent = send(file,f'{folder_path}')
+                print ( f' upload compleated {file}')
+                obj = sent['result']['document']
+                file_id = obj['file_id']
+                download_link = download_file_link(file_id=file_id)
+                obj['link'] = download_link
+                # arr.append(obj)
+                return obj 
+        except Exception as err : 
+            print(f'err in ts_process |{err}')
     def ts_upload(self,list_dir:list , folder_path:str):
-        arr = []
         scraped_data = {}
-        threads = []
         # exicuted = False
-        for file in list_dir : 
-            if not file.endswith('.m3u8') and file.endswith('.ts') : 
-                print(f'processing:{file}')
-                path = f'{folder_path}/{file}'
-                self.ts_process(file,path)
+        with ThreadPool(10) as p : 
+            arr = p.map(self.ts_process,list_dir)
+    
         return arr,scraped_data
+    
+
+
     def mp4_upload(self,dir:str='hls'): 
         list_dir = os.listdir(self.working_dir)
         arr = []
@@ -131,7 +134,7 @@ class FileSystem :
     def m3u8_files_uploader(self,folder_path:str,imdb_id:str|None=None ,ss:str|None=None,ep:str|None=None):
         list_dir = os.listdir(path=folder_path)
         arr,scraped_data = self.ts_upload(list_dir,folder_path)
-        print(arr)
+        # print(arr)
         # with open('ehh.json','r') as file : 
         #     arr = json.load(file)
 
@@ -153,29 +156,36 @@ class FileSystem :
         # print(list_dir)
         
         for f in list_dir :
-            print(len(arr))
-            if f.endswith('.m3u8') or  f.startswith('master_'):
+            # print(len(arr))
+            if f.endswith('.m3u8') or  f.startswith('master_') and f!=None:
                 print(f'm3u8 processing {f}')
                 with open(f'{folder_path}/{f}','r+') as file :
                     splited = file.read().splitlines() 
                     for index,line in enumerate(splited):
                         line = line.replace(' ' ,'')
                         # print(line)
-                        for obj in arr : 
-                            if line.endswith('.ts') or line.endswith('.m3u8') == True : 
-                                if obj['file_name'] == line :
-                                    print(f'editing : {line}')
-                                    print(obj['link'])
-                                    splited[index] = obj['link']
-                                    print ('match found loop broked ')
-                                    break
+                        for obj in arr :
+                            try : 
+                                if line.endswith('.ts') or line.endswith('.m3u8') == True and obj is not None : 
+                                    # print(obj)
+                                    if obj['file_name'] == line :
+                                        print(f'editing : {line}')
+                                        print(obj['link'])
+                                        splited[index] = obj['link']
+                                        print ('match found loop broked ')
+                                        break
+                            except Exception as err : 
+                                print(err)
                     file.seek(0)    
                     file.truncate()
                     joined = '\n'.join(splited)
                     file.write(joined)
-
+                    print(joined)
                 
                 sent = send(filename=f,path=f'{folder_path}/{f}')
+                with open(f'{folder_path}/{f}','r') as file : 
+                    # print(file.read())
+                    pass
                 obj = sent['result']['document']
                 download_link = download_file_link(obj['file_id'])
                 obj['link'] = download_link
@@ -200,7 +210,8 @@ class FileSystem :
             print(m3u8)
             self.download_video_files(m3u8,imdb_id+'x')
             self.m3u8_files_uploader(folder_path=f'{self.working_dir}/{self.m3u8_dir}',imdb_id=imdb_id,ss=ss,ep=ep)
-            self.remove_directory(self.working_dir)
+            # self.remove_directory(self.working_dir)
+            print('sakkkib')
         except Exception as err : 
             print (err)
 
@@ -211,9 +222,9 @@ if __name__ == '__main__':
     with open('Total.txt','r') as file : 
         arr = file.read().splitlines()
 
-    for i in arr:
+    # for i in arr:
         f = FileSystem()
-        f.main(imdb_id=arr[0])
+        f.main(imdb_id=arr[10])
 
 
 

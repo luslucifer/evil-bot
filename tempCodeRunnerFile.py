@@ -1,1 +1,1 @@
-working_dir
+obj

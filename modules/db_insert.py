@@ -8,13 +8,13 @@ import psycopg2
 
 # Define your Message class
 class Message:
-    def __init__(self, m3u8_link, files_list, imdb_id, ss, ep, mp4_arr):
+    def __init__(self, m3u8_link, files_list, imdb_id, ss, ep):
         self.m3u8_link = m3u8_link
         self.files_list = files_list
         self.imdb_id = imdb_id
         self.ss = ss
         self.ep = ep
-        self.mp4_arr = mp4_arr
+        # self.mp4_arr = mp4_arr
 
 def main_db(obj_j):
     # Establish connection to the PostgreSQL database
@@ -43,15 +43,15 @@ CREATE TABLE IF NOT EXISTS final_table (
         imdb_id=obj_j["imdb_id"],
         ss=obj_j["ss"],
         ep=obj_j["ep"],
-        mp4_arr=obj_j['mp4_arr']
+        # mp4_arr=obj_j['mp4_arr']
     )
 
     # Use parameterized query to avoid SQL injection
     insert_query = '''
 INSERT INTO final_table (
-    m3u8_link, files_list, imdb_id, ss, ep, mp4_arr
+    m3u8_link, files_list, imdb_id, ss, ep 
 ) VALUES (
-    %s, %s, %s, %s, %s, %s
+    %s, %s, %s, %s, %s
 );
 '''
     cursor.execute(insert_query, (
@@ -59,8 +59,8 @@ INSERT INTO final_table (
         message.files_list,
         message.imdb_id,
         message.ss,
-        message.ep,
-        json.dumps(message.mp4_arr)  # Convert list to JSON string
+        message.ep
+        # json.dumps(message.mp4_arr)  # Convert list to JSON string
     ))
 
     # Commit changes and close connection
@@ -69,6 +69,7 @@ INSERT INTO final_table (
 
 # Example usage
 # Load data from JSON file
+
 
 
 # Call the function to insert data into the PostgreSQL database
