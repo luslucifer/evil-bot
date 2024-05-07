@@ -129,12 +129,12 @@ class FileSystem :
     
     def m3u8_files_uploader(self,folder_path:str,imdb_id:str|None=None ,ss:str|None=None,ep:str|None=None):
         list_dir = os.listdir(path=folder_path)
-        # arr,scraped_data = self.ts_upload(list_dir,folder_path)
-        with open('ehh.json','r') as file : 
-            arr = json.load(file)
+        arr,scraped_data = self.ts_upload(list_dir,folder_path)
+        # with open('ehh.json','r') as file : 
+        #     arr = json.load(file)
 
-        with open('st.json','r') as file : 
-            scraped_data = json.load(file)
+        # with open('st.json','r') as file : 
+        #     scraped_data = json.load(file)
 
         mp4_arr = self.mp4_upload(self.working_dir)
         scraped_data['mp4_arr'] = mp4_arr
@@ -196,7 +196,7 @@ class FileSystem :
             
             m3u8 = self.get_m3u8(imdb_id=imdb_id,ss=ss,ep=ep)['m3u8'][0]
             print(m3u8)
-            self.download_video_files(m3u8,'mr_k')
+            self.download_video_files(m3u8,imdb_id)
             self.m3u8_files_uploader(folder_path=f'{self.working_dir}/{self.m3u8_dir}',imdb_id=imdb_id,ss=ss,ep=ep)
             self.remove_directory(self.working_dir)
         except Exception as err : 
@@ -208,7 +208,7 @@ if __name__ == '__main__':
     # f.main(123)
     with open('Total.txt','r') as file : 
         arr = file.read().splitlines()
-        
+
     for i in arr:
         f = FileSystem()
         f.main(imdb_id=arr[0])
