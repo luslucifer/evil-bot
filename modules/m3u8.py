@@ -56,7 +56,7 @@ class M3u8:
     def ts_to_mp4(self, name:str):
         output_name = name.split('.')[0] + '.mp4'
         command = ['ffmpeg', '-y', '-loglevel', 'quiet', '-i', name, '-c', 'copy', output_name]
-        subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        # subprocess.run(command, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
     
     def master_m3u8_scraper(self, m3u8_text:str):
         splited = m3u8_text.splitlines()
