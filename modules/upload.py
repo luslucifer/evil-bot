@@ -5,7 +5,7 @@ import time
 
 TOKEN = '6731479806:AAEIu9BamwRVhXeEwhzQzdELgA74t3WCkKk'
 
-def send(filename: str, path: str, chat_id: str = '-4207795971', TOKEN: str = TOKEN, max_retries: int = 3, initial_retry_delay: float = 1.0, max_retry_delay: float = 60.0):
+def send(filename: str, path: str, chat_id: str = '-1002045253321', TOKEN: str = TOKEN, max_retries: int = 3, initial_retry_delay: float = 1.0, max_retry_delay: float = 60.0):
     url = f'https://api.telegram.org/bot{TOKEN}/sendDocument'
     params = {'chat_id': chat_id}
 
@@ -35,3 +35,4 @@ def send(filename: str, path: str, chat_id: str = '-4207795971', TOKEN: str = TO
 
     print("Exceeded maximum retries, giving up.")
     return None
+
